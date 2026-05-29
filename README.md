@@ -2,7 +2,7 @@
 
 > A supply chain KPI dashboard that simulates the operations of a distribution center.
 
-**🔗 Live demo:** _add your deploy URL here (Vercel / Netlify)_
+**🔗 Live demo:** https://logistics-control-tower-mu.vercel.app
 
 A control tower lets a logistics team monitor the health of a distribution
 center at a glance: are orders arriving on time and complete? Is stock
