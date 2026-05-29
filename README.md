@@ -22,7 +22,7 @@ operational data like a real relational system**.
 ![Dashboard](docs/screenshots/dashboard.png)
 
 ### Supplier scorecard — on-time delivery, delay and spend per supplier
-![Supplier scorecard](docs/screenshots/suppliers.png)
+![Supplier scorecard](docs/screenshots/supplier.png)
 
 ### Scenario simulator — what-if impact on KPIs
 ![Scenario simulator](docs/screenshots/scenario.png)
