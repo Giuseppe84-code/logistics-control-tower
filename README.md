@@ -16,6 +16,19 @@ operational data like a real relational system**.
 
 ---
 
+## Screenshots
+
+### Dashboard — KPIs, alerts and monthly trends
+![Dashboard](docs/screenshots/dashboard.png)
+
+### Supplier scorecard — on-time delivery, delay and spend per supplier
+![Supplier scorecard](docs/screenshots/suppliers.png)
+
+### Scenario simulator — what-if impact on KPIs
+![Scenario simulator](docs/screenshots/scenario.png)
+
+---
+
 ## What it does
 
 - **KPI dashboard** — six core supply chain metrics, each with a plain-language
