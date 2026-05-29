@@ -34,7 +34,11 @@ operational data like a real relational system**.
   *supplier reliability* and see the estimated impact on every KPI. This is
   classic what-if analysis: _"if a key supplier's reliability drops 15%, what
   happens to OTIF?"_
-- **Orders table** — searchable, filterable (status, region) and sortable.
+- **Orders table** — searchable, filterable (status, region), sortable, and
+  exportable to CSV (respects the active filters).
+- **Supplier scorecard** — supplier performance derived from received purchase
+  orders: on-time delivery rate, average delay, lead time and spend, with a
+  rating per supplier and CSV export.
 
 ---
 
@@ -166,7 +170,7 @@ src/
 ├── lib/          # Pure functions: KPI calculations + scenario impact model
 ├── hooks/        # Reactive data access (useKPIs, useAlertThresholds)
 ├── components/   # ui · dashboard · charts · orders · scenario
-└── pages/        # DashboardPage · OrdersPage · ScenarioPage
+└── pages/        # DashboardPage · OrdersPage · SuppliersPage · ScenarioPage
 ```
 
 KPI logic lives in `src/lib/kpi.ts` as **pure functions** — they take arrays
@@ -209,6 +213,6 @@ Both rewrite all routes to `index.html` so React Router's deep links
 
 ## Possible extensions
 
-- CSV export of the orders table
-- Supplier scorecard page (lead time vs. reliability)
 - Swap Dexie for a Postgres/SQLite backend using the same schema
+- Demand forecasting on the order history
+- Multi-warehouse inventory view

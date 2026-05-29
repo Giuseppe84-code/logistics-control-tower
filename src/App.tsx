@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { seedDatabase } from './db/seed'
 import { DashboardPage } from './pages/DashboardPage'
 import { OrdersPage } from './pages/OrdersPage'
+import { SuppliersPage } from './pages/SuppliersPage'
 import { ScenarioPage } from './pages/ScenarioPage'
 
 function NavItem({ to, label }: { to: string; label: string }) {
@@ -48,6 +49,7 @@ export default function App() {
               <nav className="flex items-center gap-1">
                 <NavItem to="/dashboard" label="Dashboard" />
                 <NavItem to="/orders" label="Orders" />
+                <NavItem to="/suppliers" label="Suppliers" />
                 <NavItem to="/scenario" label="Scenario" />
               </nav>
             </div>
@@ -68,6 +70,7 @@ export default function App() {
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/orders" element={<OrdersPage />} />
+              <Route path="/suppliers" element={<SuppliersPage />} />
               <Route path="/scenario" element={<ScenarioPage />} />
             </Routes>
           )}

@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../../db/db'
 import type { Order, OrderStatus } from '../../types'
 import { Badge } from '../ui/Badge'
+import { toCSV, downloadCSV } from '../../lib/csv'
 
 type SortKey = keyof Pick<Order, 'order_date' | 'requested_delivery_date' | 'total_value' | 'status'>
 type SortDir = 'asc' | 'desc'
@@ -72,6 +73,20 @@ export function OrdersTable() {
     return <span className="text-blue-400 ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>
   }
 
+  function handleExport() {
+    const csv = toCSV(filtered, [
+      { key: 'id', header: 'Order ID' },
+      { key: 'customer_name', header: 'Customer' },
+      { key: 'customer_region', header: 'Region' },
+      { key: 'order_date', header: 'Order Date', get: o => o.order_date.toISOString().slice(0, 10) },
+      { key: 'requested_delivery_date', header: 'Requested Delivery', get: o => o.requested_delivery_date.toISOString().slice(0, 10) },
+      { key: 'status', header: 'Status' },
+      { key: 'total_value', header: 'Total Value (EUR)' },
+    ])
+    const stamp = new Date().toISOString().slice(0, 10)
+    downloadCSV(`orders_${stamp}.csv`, csv)
+  }
+
   const statuses: OrderStatus[] = ['pending', 'processing', 'shipped', 'delivered', 'cancelled']
 
   return (
@@ -102,6 +117,13 @@ export function OrdersTable() {
           {regions.map(r => <option key={r} value={r}>{r}</option>)}
         </select>
         <span className="self-center text-xs text-slate-500">{filtered.length} orders</span>
+        <button
+          onClick={handleExport}
+          disabled={filtered.length === 0}
+          className="ml-auto self-center text-sm font-medium text-slate-200 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-700 rounded-lg px-4 py-2 transition-colors"
+        >
+          Export CSV
+        </button>
       </div>
 
       {/* Table */}
