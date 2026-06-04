@@ -4,6 +4,8 @@ import type { AlertThresholds } from '../../types'
 interface ThresholdEditorProps {
   thresholds: AlertThresholds
   onUpdate: (updates: Partial<Omit<AlertThresholds, 'id'>>) => void
+  isPro: boolean
+  onUpgrade: () => void
 }
 
 interface FieldDef {
@@ -22,13 +24,27 @@ const FIELDS: FieldDef[] = [
   { key: 'avgShippingCost_max', label: 'Avg Shipping Cost max', unit: '€', step: 5 },
 ]
 
-export function ThresholdEditor({ thresholds, onUpdate }: ThresholdEditorProps) {
+export function ThresholdEditor({ thresholds, onUpdate, isPro, onUpgrade }: ThresholdEditorProps) {
   const [open, setOpen] = useState(false)
   const [local, setLocal] = useState<Omit<AlertThresholds, 'id'>>({ ...thresholds })
 
   function handleSave() {
     onUpdate(local)
     setOpen(false)
+  }
+
+  if (!isPro) {
+    return (
+      <button
+        onClick={onUpgrade}
+        className="inline-flex items-center gap-2 text-xs text-slate-500 border border-slate-700 rounded-lg px-3 py-1.5 transition-colors hover:text-slate-300"
+      >
+        Configure Thresholds
+        <span className="text-[10px] font-semibold uppercase tracking-wide text-blue-300 bg-blue-500/15 border border-blue-500/30 rounded px-1.5 py-0.5">
+          Pro
+        </span>
+      </button>
+    )
   }
 
   return (

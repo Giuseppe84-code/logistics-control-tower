@@ -1,6 +1,8 @@
-import { useState, useMemo } from 'react'
-import { useLiveQuery } from 'dexie-react-hooks'
-import { db } from '../../db/db'
+import { useState, useMemo, useEffect } from 'react'
+import { supabase } from '../../lib/supabase'
+import { mapOrder } from '../../lib/dataMappers'
+import { useAuth, isPro } from '../../contexts/AuthContext'
+import { startCheckout } from '../../lib/billing'
 import type { Order, OrderStatus } from '../../types'
 import { Badge } from '../ui/Badge'
 import { toCSV, downloadCSV } from '../../lib/csv'
@@ -21,8 +23,24 @@ function formatDate(d: Date): string {
 }
 
 export function OrdersTable() {
-  const orders = useLiveQuery(() => db.orders.toArray())
+  const { profile } = useAuth()
+  const pro = isPro(profile)
+  const [orders, setOrders] = useState<Order[] | undefined>(undefined)
   const [search, setSearch] = useState('')
+
+  useEffect(() => {
+    let active = true
+    async function load() {
+      const { data } = await supabase.from('orders').select('*')
+      if (!active) return
+      setOrders((data ?? []).map(mapOrder))
+    }
+    load()
+    return () => {
+      active = false
+    }
+  }, [])
+
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all')
   const [regionFilter, setRegionFilter] = useState<string>('all')
   const [sortKey, setSortKey] = useState<SortKey>('order_date')
@@ -74,6 +92,7 @@ export function OrdersTable() {
   }
 
   function handleExport() {
+    if (!pro) return
     const csv = toCSV(filtered, [
       { key: 'id', header: 'Order ID' },
       { key: 'customer_name', header: 'Customer' },
@@ -117,13 +136,25 @@ export function OrdersTable() {
           {regions.map(r => <option key={r} value={r}>{r}</option>)}
         </select>
         <span className="self-center text-xs text-slate-500">{filtered.length} orders</span>
-        <button
-          onClick={handleExport}
-          disabled={filtered.length === 0}
-          className="ml-auto self-center text-sm font-medium text-slate-200 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-700 rounded-lg px-4 py-2 transition-colors"
-        >
-          Export CSV
-        </button>
+        {pro ? (
+          <button
+            onClick={handleExport}
+            disabled={filtered.length === 0}
+            className="ml-auto self-center text-sm font-medium text-slate-200 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-700 rounded-lg px-4 py-2 transition-colors"
+          >
+            Export CSV
+          </button>
+        ) : (
+          <button
+            onClick={() => startCheckout().catch(() => alert('Stripe coming soon'))}
+            className="ml-auto self-center inline-flex items-center gap-2 text-sm font-medium text-slate-400 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg px-4 py-2 transition-colors"
+          >
+            Export CSV
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-blue-300 bg-blue-500/15 border border-blue-500/30 rounded px-1.5 py-0.5">
+              Pro
+            </span>
+          </button>
+        )}
       </div>
 
       {/* Table */}
