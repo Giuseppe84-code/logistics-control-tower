@@ -4,10 +4,18 @@ import { KPICard } from '../components/dashboard/KPICard'
 import { AlertBanner } from '../components/dashboard/AlertBanner'
 import { ThresholdEditor } from '../components/dashboard/ThresholdEditor'
 import { TrendChart } from '../components/charts/TrendChart'
+import { useAuth, isPro } from '../contexts/AuthContext'
+import { startCheckout } from '../lib/billing'
 
 export function DashboardPage() {
   const kpis = useKPIs()
   const { thresholds, updateThresholds } = useAlertThresholds()
+  const { profile } = useAuth()
+  const pro = isPro(profile)
+
+  function handleUpgrade() {
+    startCheckout().catch(() => alert('Stripe coming soon'))
+  }
 
   if (!kpis) {
     return (
@@ -50,7 +58,7 @@ export function DashboardPage() {
 
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-slate-200">KPI Overview</h2>
-        <ThresholdEditor thresholds={thresholds} onUpdate={updateThresholds} />
+        <ThresholdEditor thresholds={thresholds} onUpdate={updateThresholds} isPro={pro} onUpgrade={handleUpgrade} />
       </div>
 
       {/* KPI Cards grid */}

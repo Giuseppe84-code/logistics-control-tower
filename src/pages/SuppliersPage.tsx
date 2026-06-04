@@ -1,6 +1,8 @@
 import { useSupplierScores } from '../hooks/useSupplierScores'
 import { Badge } from '../components/ui/Badge'
 import { toCSV, downloadCSV } from '../lib/csv'
+import { useAuth, isPro } from '../contexts/AuthContext'
+import { startCheckout } from '../lib/billing'
 import {
   ResponsiveContainer,
   BarChart,
@@ -27,6 +29,8 @@ function barColor(onTimeRate: number): string {
 
 export function SuppliersPage() {
   const scores = useSupplierScores()
+  const { profile } = useAuth()
+  const pro = isPro(profile)
 
   if (!scores) {
     return (
@@ -37,6 +41,7 @@ export function SuppliersPage() {
   }
 
   function handleExport() {
+    if (!pro) return
     const csv = toCSV(scores ?? [], [
       { key: 'name', header: 'Supplier' },
       { key: 'country', header: 'Country' },
@@ -88,12 +93,24 @@ export function SuppliersPage() {
       {/* Scorecard table */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-slate-300">Performance Detail</h3>
-        <button
-          onClick={handleExport}
-          className="text-sm font-medium text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg px-4 py-2 transition-colors"
-        >
-          Export CSV
-        </button>
+        {pro ? (
+          <button
+            onClick={handleExport}
+            className="text-sm font-medium text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg px-4 py-2 transition-colors"
+          >
+            Export CSV
+          </button>
+        ) : (
+          <button
+            onClick={() => startCheckout().catch(() => alert('Stripe coming soon'))}
+            className="inline-flex items-center gap-2 text-sm font-medium text-slate-400 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg px-4 py-2 transition-colors"
+          >
+            Export CSV
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-blue-300 bg-blue-500/15 border border-blue-500/30 rounded px-1.5 py-0.5">
+              Pro
+            </span>
+          </button>
+        )}
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-slate-700">
