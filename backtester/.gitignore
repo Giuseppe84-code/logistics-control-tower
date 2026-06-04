@@ -1,3 +1,7 @@
 __pycache__/
 .cache/
 *.png
+
+# Forward-tester runtime state (per-machine, not source)
+state.json
+log.csv
