@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APEXDRIVE — Il cuore delle supercar</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --red: #C1121F;
+    --red-dim: #7a0a12;
+    --gold: #C9A84C;
+    --black: #0A0A0A;
+    --dark: #111111;
+    --card-bg: #161616;
+    --border: #2a2a2a;
+    --text: #E8E8E2;
+    --muted: #888880;
+    --font-head: 'Bebas Neue', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2.5rem;
+    height: 60px;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: var(--font-head);
+    font-size: 2rem;
+    letter-spacing: 3px;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--red); }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--red); }
+  .nav-cta {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 0.45rem 1.2rem;
+    border: 1px solid var(--red);
+    color: var(--red);
+    text-decoration: none;
+    transition: background .2s, color .2s;
+  }
+  .nav-cta:hover { background: var(--red); color: #fff; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    padding-top: 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 5rem 3rem 5rem 2.5rem;
+    position: relative;
+    z-index: 2;
+  }
+  .hero-tag {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .hero-tag::before {
+    content: '';
+    display: block;
+    width: 2rem; height: 1px;
+    background: var(--red);
+  }
+  .hero-title {
+    font-family: var(--font-head);
+    font-size: clamp(4rem, 7vw, 7rem);
+    line-height: 0.92;
+    letter-spacing: 2px;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+  }
+  .hero-title em {
+    font-style: normal;
+    color: var(--red);
+    display: block;
+  }
+  .hero-sub {
+    font-size: 1rem;
+    color: var(--muted);
+    max-width: 400px;
+    margin-bottom: 2.5rem;
+    line-height: 1.8;
+  }
+  .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .btn-primary {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 0.8rem 2rem;
+    background: var(--red);
+    color: #fff;
+    text-decoration: none;
+    transition: background .2s;
+  }
+  .btn-primary:hover { background: var(--red-dim); }
+  .btn-ghost {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 0.8rem 2rem;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    text-decoration: none;
+    transition: border-color .2s, color .2s;
+  }
+  .btn-ghost:hover { border-color: var(--text); color: var(--text); }
+  .hero-stats {
+    display: flex; gap: 3rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+  .stat-num {
+    font-family: var(--font-head);
+    font-size: 2.2rem;
+    color: var(--text);
+    display: block;
+    letter-spacing: 1px;
+  }
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .hero-right {
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-img-wrap {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(to right, var(--black) 0%, transparent 30%),
+      url('https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1200&q=80') center/cover no-repeat;
+  }
+  .hero-overlay-text {
+    position: absolute;
+    bottom: 2rem; right: 2rem;
+    font-family: var(--font-head);
+    font-size: 10rem;
+    color: rgba(255,255,255,0.03);
+    letter-spacing: -5px;
+    line-height: 1;
+    user-select: none;
+  }
+
+  /* TICKER */
+  .ticker {
+    background: var(--red);
+    padding: 0.6rem 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .ticker-inner {
+    display: inline-block;
+    animation: ticker 20s linear infinite;
+  }
+  .ticker-inner span {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.9);
+    padding: 0 2.5rem;
+  }
+  .ticker-inner span::after {
+    content: '◆';
+    padding-left: 2.5rem;
+    opacity: 0.5;
+  }
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* SECTIONS */
+  section { padding: 5rem 2.5rem; }
+  .section-header {
+    display: flex; align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1rem;
+  }
+  .section-title {
+    font-family: var(--font-head);
+    font-size: 3rem;
+    letter-spacing: 2px;
+    color: var(--text);
+  }
+  .section-title span { color: var(--red); }
+  .section-link {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .section-link:hover { color: var(--red); }
+
+  /* FEATURED ARTICLES GRID */
+  .articles-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 1.5px;
+    background: var(--border);
+  }
+  .article-card {
+    background: var(--dark);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+  .article-card.featured { grid-row: 1 / 3; }
+  .article-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .5s ease, filter .5s ease;
+    filter: brightness(0.6);
+  }
+  .article-card.featured img { height: 520px; }
+  .article-card:not(.featured) img { height: 250px; }
+  .article-card:hover img { transform: scale(1.04); filter: brightness(0.45); }
+  .card-content {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 1.8rem;
+    background: linear-gradient(to top, rgba(10,10,10,0.98) 0%, transparent 100%);
+  }
+  .card-meta {
+    display: flex; gap: 1rem;
+    align-items: center;
+    margin-bottom: 0.6rem;
+  }
+  .card-cat {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--red);
+    background: rgba(193,18,31,0.15);
+    padding: 0.2rem 0.6rem;
+    border: 1px solid rgba(193,18,31,0.3);
+  }
+  .card-time {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+  .card-title {
+    font-family: var(--font-head);
+    font-size: 1.8rem;
+    letter-spacing: 1px;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+  .article-card:not(.featured) .card-title { font-size: 1.2rem; }
+  .card-excerpt {
+    font-size: 0.85rem;
+    color: rgba(232,232,226,0.7);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .article-card:not(.featured) .card-excerpt { display: none; }
+  .card-read {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    margin-top: 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--red);
+    opacity: 0;
+    transition: opacity .3s;
+  }
+  .article-card:hover .card-read { opacity: 1; }
+
+  /* CATEGORIES BAR */
+  .categories {
+    background: var(--dark);
+    padding: 3rem 2.5rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    background: var(--border);
+  }
+  .cat-item {
+    background: var(--dark);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: background .2s;
+    text-decoration: none;
+    color: inherit;
+  }
+  .cat-item:hover { background: #1e1e1e; }
+  .cat-icon {
+    font-size: 1.8rem;
+    margin-bottom: 0.75rem;
+    display: block;
+    color: var(--red);
+    font-family: var(--font-head);
+    letter-spacing: 1px;
+  }
+  .cat-name {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+  }
+  .cat-count {
+    font-family: var(--font-head);
+    font-size: 1.4rem;
+    color: var(--text);
+    margin-top: 0.3rem;
+    display: block;
+  }
+
+  /* ARTICLE LIST */
+  .article-list { display: grid; gap: 1px; background: var(--border); }
+  .list-item {
+    background: var(--dark);
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    text-decoration: none;
+    color: inherit;
+    transition: background .2s;
+  }
+  .list-item:hover { background: #161616; }
+  .list-item img {
+    width: 240px; height: 160px;
+    object-fit: cover;
+    display: block;
+    filter: brightness(0.8);
+    transition: filter .3s;
+  }
+  .list-item:hover img { filter: brightness(0.65); }
+  .list-body {
+    padding: 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .list-title {
+    font-family: var(--font-head);
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+    margin: 0.4rem 0 0.6rem;
+    color: var(--text);
+  }
+  .list-excerpt {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .list-footer {
+    display: flex; align-items: center; gap: 1.5rem;
+    margin-top: 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+  .list-footer .author { color: var(--gold); }
+
+  /* NEWSLETTER */
+  .newsletter {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    padding: 4rem 2.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+    margin: 0 2.5rem;
+  }
+  .nl-title {
+    font-family: var(--font-head);
+    font-size: 3.5rem;
+    letter-spacing: 2px;
+    line-height: 1;
+    color: var(--text);
+  }
+  .nl-title span { color: var(--red); }
+  .nl-sub {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  .nl-form { display: flex; flex-direction: column; gap: 1rem; }
+  .nl-form input[type="email"] {
+    background: var(--black);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.9rem 1.2rem;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .nl-form input[type="email"]:focus { border-color: var(--red); }
+  .nl-form input::placeholder { color: var(--muted); }
+  .nl-form button {
+    background: var(--red);
+    border: none;
+    color: #fff;
+    padding: 0.9rem 1.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .nl-form button:hover { background: var(--red-dim); }
+  .nl-privacy {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+
+  /* FOOTER */
+  footer {
+    margin-top: 5rem;
+    padding: 3rem 2.5rem 2rem;
+    border-top: 1px solid var(--border);
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+  }
+  .footer-brand-name {
+    font-family: var(--font-head);
+    font-size: 2.5rem;
+    letter-spacing: 3px;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+  .footer-brand-name span { color: var(--red); }
+  .footer-tagline {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+  .social-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .social-link {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    text-decoration: none;
+    transition: border-color .2s, color .2s;
+  }
+  .social-link:hover { border-color: var(--red); color: var(--red); }
+  .footer-col h4 {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.2rem;
+  }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+  .footer-col ul a {
+    font-size: 0.88rem;
+    color: rgba(232,232,226,0.6);
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .footer-col ul a:hover { color: var(--red); }
+  .footer-bottom {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+
+  /* MOBILE */
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-right { display: none; }
+    .hero-left { padding: 4rem 1.5rem 3rem; }
+    .articles-grid { grid-template-columns: 1fr; grid-template-rows: auto; }
+    .article-card.featured { grid-row: auto; }
+    .article-card.featured img { height: 320px; }
+    .cat-grid { grid-template-columns: repeat(3, 1fr); }
+    .list-item { grid-template-columns: 1fr; }
+    .list-item img { width: 100%; height: 200px; }
+    .newsletter { grid-template-columns: 1fr; margin: 0 1rem; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    nav { padding: 0 1.5rem; }
+    .nav-links { display: none; }
+    section { padding: 3rem 1.5rem; }
+    .section-header { flex-direction: column; gap: 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">APEX<span>DRIVE</span></a>
+  <ul class="nav-links">
+    <li><a href="#notizie">Notizie</a></li>
+    <li><a href="#test-drive">Test Drive</a></li>
+    <li><a href="#storia">Storia</a></li>
+    <li><a href="#guide">Guide</a></li>
+    <li><a href="#confronti">Confronti</a></li>
+  </ul>
+  <a href="#newsletter" class="nav-cta">Newsletter</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero" style="padding: 0; border-bottom: 1px solid #2a2a2a;">
+  <div class="hero-left">
+    <p class="hero-tag">Il cuore delle supercar</p>
+    <h1 class="hero-title">
+      VELOCITÀ<br>SENZA<br><em>COMPROMESSI.</em>
+    </h1>
+    <p class="hero-sub">Giornalismo automobilistico d'alta gamma. Analisi tecniche, test esclusivi e storie leggendarie dal mondo delle macchine più estreme mai costruite.</p>
+    <div class="hero-btns">
+      <a href="#articoli" class="btn-primary">Leggi gli articoli</a>
+      <a href="#newsletter" class="btn-ghost">Iscriviti gratis</a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <span class="stat-num">340+</span>
+        <span class="stat-label">Articoli</span>
+      </div>
+      <div>
+        <span class="stat-num">120</span>
+        <span class="stat-label">Test Drive</span>
+      </div>
+      <div>
+        <span class="stat-num">48K</span>
+        <span class="stat-label">Lettori/mese</span>
+      </div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-img-wrap"></div>
+    <div class="hero-overlay-text">V12</div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span>Ferrari SF90 Stradale</span><span>McLaren 750S</span><span>Lamborghini Revuelto</span><span>Porsche 911 GT3 RS</span><span>Bugatti Chiron</span><span>Koenigsegg Jesko</span><span>Pagani Huayra R</span><span>Aston Martin Valkyrie</span>
+    <span>Ferrari SF90 Stradale</span><span>McLaren 750S</span><span>Lamborghini Revuelto</span><span>Porsche 911 GT3 RS</span><span>Bugatti Chiron</span><span>Koenigsegg Jesko</span><span>Pagani Huayra R</span><span>Aston Martin Valkyrie</span>
+  </div>
+</div>
+
+<!-- ARTICOLI IN EVIDENZA -->
+<section id="articoli">
+  <div class="section-header">
+    <h2 class="section-title">IN <span>EVIDENZA</span></h2>
+    <a href="#" class="section-link">Tutti gli articoli →</a>
+  </div>
+  <div class="articles-grid">
+    <!-- FEATURED -->
+    <a href="#" class="article-card featured">
+      <img src="https://images.unsplash.com/photo-1592198084033-aade902d1aae?w=900&q=80" alt="Ferrari SF90">
+      <div class="card-content">
+        <div class="card-meta">
+          <span class="card-cat">Test Drive</span>
+          <span class="card-time">8 min lettura</span>
+        </div>
+        <h3 class="card-title">Ferrari SF90 Stradale: quando la fisica si arrende</h3>
+        <p class="card-excerpt">1.000 CV ibridi, quattro ruote motrici e un tempo sul giro che ridefinisce il concetto di supercar di serie. Abbiamo guidato la più potente Ferrari stradale di sempre su pista e su strada.</p>
+        <span class="card-read">Leggi l'articolo →</span>
+      </div>
+    </a>
+    <!-- CARD 2 -->
+    <a href="#" class="article-card">
+      <img src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=600&q=80" alt="McLaren F1">
+      <div class="card-content">
+        <div class="card-meta">
+          <span class="card-cat">Storia & Leggenda</span>
+          <span class="card-time">12 min lettura</span>
+        </div>
+        <h3 class="card-title">McLaren F1: la macchina che non ha mai smesso di stupire</h3>
+        <span class="card-read">Leggi →</span>
+      </div>
+    </a>
+    <!-- CARD 3 -->
+    <a href="#" class="article-card">
+      <img src="https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?w=600&q=80" alt="Lamborghini vs Porsche">
+      <div class="card-content">
+        <div class="card-meta">
+          <span class="card-cat">Confronto</span>
+          <span class="card-time">10 min lettura</span>
+        </div>
+        <h3 class="card-title">Huracán STO vs 911 GT3 RS: pista totale</h3>
+        <span class="card-read">Leggi →</span>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- CATEGORIE -->
+<div class="categories" id="notizie">
+  <div class="cat-grid">
+    <a href="#" class="cat-item">
+      <span class="cat-icon">⚡</span>
+      <span class="cat-name">Notizie</span>
+      <span class="cat-count">87</span>
+    </a>
+    <a href="#" class="cat-item" id="test-drive">
+      <span class="cat-icon">🏁</span>
+      <span class="cat-name">Test Drive</span>
+      <span class="cat-count">124</span>
+    </a>
+    <a href="#" class="cat-item" id="storia">
+      <span class="cat-icon">🏆</span>
+      <span class="cat-name">Storia</span>
+      <span class="cat-count">56</span>
+    </a>
+    <a href="#" class="cat-item" id="guide">
+      <span class="cat-icon">📖</span>
+      <span class="cat-name">Guide Acquisto</span>
+      <span class="cat-count">34</span>
+    </a>
+    <a href="#" class="cat-item" id="confronti">
+      <span class="cat-icon">⚔️</span>
+      <span class="cat-name">Confronti</span>
+      <span class="cat-count">42</span>
+    </a>
+  </div>
+</div>
+
+<!-- ULTIMI ARTICOLI -->
+<section>
+  <div class="section-header">
+    <h2 class="section-title">ULTIMI <span>ARTICOLI</span></h2>
+    <a href="#" class="section-link">Archivio completo →</a>
+  </div>
+  <div class="article-list">
+    <!-- 1 -->
+    <a href="#" class="list-item">
+      <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80" alt="McLaren F1">
+      <div class="list-body">
+        <div class="card-meta">
+          <span class="card-cat">Storia & Leggenda</span>
+          <span class="card-time">12 min lettura</span>
+        </div>
+        <h3 class="list-title">McLaren F1: trent'anni dopo, ancora imbattuta</h3>
+        <p class="list-excerpt">Gordon Murray progettò qualcosa di unico: una monoposto stradale con motore BMW S70/2 da 6.1L aspirato, sedile centrale e un record di velocità top (386 km/h) che nessuna supercar di serie riuscì a superare per dodici anni.</p>
+        <div class="list-footer">
+          <span class="author">Marco Vitali</span>
+          <span>15 Marzo 2025</span>
+          <span>7.4K letture</span>
+        </div>
+      </div>
+    </a>
+    <!-- 2 -->
+    <a href="#" class="list-item">
+      <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&q=80" alt="Porsche 911 Turbo S">
+      <div class="list-body">
+        <div class="card-meta">
+          <span class="card-cat">Confronto</span>
+          <span class="card-time">10 min lettura</span>
+        </div>
+        <h3 class="list-title">Lamborghini Huracán STO vs Porsche 911 Turbo S: il duello definitivo</h3>
+        <p class="list-excerpt">Un V10 atmosferico contro un flat-six biturbo. La brutalità italiana contro la perfezione svevo-germanica. Li abbiamo portati allo stesso giorno di pista per trovare una risposta definitiva.</p>
+        <div class="list-footer">
+          <span class="author">Giulia Ferrero</span>
+          <span>2 Febbraio 2025</span>
+          <span>12.1K letture</span>
+        </div>
+      </div>
+    </a>
+    <!-- 3 -->
+    <a href="#" class="list-item">
+      <img src="https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=400&q=80" alt="Bugatti Chiron">
+      <div class="list-body">
+        <div class="card-meta">
+          <span class="card-cat">Guida Acquisto</span>
+          <span class="card-time">15 min lettura</span>
+        </div>
+        <h3 class="list-title">Comprare una supercar usata: la guida completa per non fare errori</h3>
+        <p class="list-excerpt">Dal controllo della storia di manutenzione alle trappole dei concessionari privati: tutto quello che devi sapere prima di firmare per una vettura da 100.000€ in su.</p>
+        <div class="list-footer">
+          <span class="author">Andrea Conti</span>
+          <span>20 Gennaio 2025</span>
+          <span>9.8K letture</span>
+        </div>
+      </div>
+    </a>
+    <!-- 4 -->
+    <a href="#" class="list-item">
+      <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400&q=80" alt="Koenigsegg">
+      <div class="list-body">
+        <div class="card-meta">
+          <span class="card-cat">Notizie</span>
+          <span class="card-time">5 min lettura</span>
+        </div>
+        <h3 class="list-title">Koenigsegg Jesko Absolut: il progetto per i 330 mph</h3>
+        <p class="list-excerpt">Christian von Koenigsegg spiega l'aerodinamica e le scelte ingegneristiche dietro al modello progettato per battere il record assoluto di velocità su strada. I numeri fanno paura.</p>
+        <div class="list-footer">
+          <span class="author">Luca Messina</span>
+          <span>8 Gennaio 2025</span>
+          <span>18.3K letture</span>
+        </div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<div id="newsletter" style="padding: 2rem 0 5rem;">
+  <div class="newsletter">
+    <div>
+      <h2 class="nl-title">NON PERDERTI<br>NULLA<br><span>DI IMPORTANTE.</span></h2>
+      <p class="nl-sub">Ogni settimana: un'analisi tecnica approfondita, il miglior test della settimana e le notizie che contano. Niente spam, solo benzina ad alto numero di ottani.</p>
+    </div>
+    <div class="nl-form">
+      <input type="email" placeholder="la-tua@email.com">
+      <button type="button" onclick="this.textContent='✓ Iscritto — benvenuto!'">Iscriviti alla newsletter</button>
+      <p class="nl-privacy">Nessuno spam. Disiscrizione con un click. Privacy garantita.</p>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand-name">APEX<span>DRIVE</span></div>
+      <p class="footer-tagline">Il giornalismo automobilistico che meritano le grandi macchine.</p>
+      <div class="social-row">
+        <a href="#" class="social-link">Instagram</a>
+        <a href="#" class="social-link">YouTube</a>
+        <a href="#" class="social-link">X</a>
+        <a href="#" class="social-link">Facebook</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Sezioni</h4>
+      <ul>
+        <li><a href="#">Notizie</a></li>
+        <li><a href="#">Test Drive</a></li>
+        <li><a href="#">Storia & Leggenda</a></li>
+        <li><a href="#">Confronti</a></li>
+        <li><a href="#">Guide Acquisto</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Marchi</h4>
+      <ul>
+        <li><a href="#">Ferrari</a></li>
+        <li><a href="#">Lamborghini</a></li>
+        <li><a href="#">McLaren</a></li>
+        <li><a href="#">Porsche</a></li>
+        <li><a href="#">Bugatti</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Info</h4>
+      <ul>
+        <li><a href="#">Chi siamo</a></li>
+        <li><a href="#">Scrivere per noi</a></li>
+        <li><a href="#">Pubblicità</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Contatti</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 ApexDrive — Tutti i diritti riservati</span>
+    <span>Disclaimer: immagini a scopo illustrativo. Tutti i marchi citati appartengono ai rispettivi proprietari.</span>
+  </div>
+</footer>
+
+</body>
+</html>
