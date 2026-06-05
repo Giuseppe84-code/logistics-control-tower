@@ -1,22 +1,31 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import Stripe from 'https://esm.sh/stripe@14?target=deno'
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
-  apiVersion: '2024-04-10',
-})
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+}
+
+interface CheckoutBody {
+  priceId: string
+  userId: string
+  userEmail: string
+  successUrl: string
+  cancelUrl: string
+}
 
 Deno.serve(async (req: Request) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'authorization, content-type',
-      },
-    })
-  }
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
   try {
-    const { priceId, userId, userEmail, successUrl, cancelUrl } = await req.json()
+    const secretKey = Deno.env.get('STRIPE_SECRET_KEY')
+    if (!secretKey) throw new Error('STRIPE_SECRET_KEY not configured')
+
+    const stripe = new Stripe(secretKey, { apiVersion: '2024-04-10' })
+
+    const { priceId, userId, userEmail, successUrl, cancelUrl } =
+      await req.json() as CheckoutBody
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
@@ -26,21 +35,17 @@ Deno.serve(async (req: Request) => {
       customer_email: userEmail,
       success_url: successUrl,
       cancel_url: cancelUrl,
-      subscription_data: {
-        metadata: { userId },
-      },
+      subscription_data: { metadata: { userId } },
     })
 
     return new Response(JSON.stringify({ url: session.url }), {
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: { 'Content-Type': 'application/json', ...CORS },
     })
   } catch (err) {
-    return new Response(JSON.stringify({ error: String(err) }), {
+    const message = err instanceof Error ? err.message : String(err)
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: { 'Content-Type': 'application/json', ...CORS },
     })
   }
 })
