@@ -76,7 +76,10 @@ function AuthenticatedApp() {
   }, [user])
 
   function handleUpgrade() {
-    startCheckout().catch(() => alert('Stripe coming soon'))
+    startCheckout().catch((err: unknown) => {
+      const msg = err instanceof Error ? err.message : String(err)
+      alert(`Checkout error: ${msg}`)
+    })
   }
 
   return (
