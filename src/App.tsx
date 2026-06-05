@@ -10,6 +10,7 @@ import { DashboardPage } from './pages/DashboardPage'
 import { OrdersPage } from './pages/OrdersPage'
 import { SuppliersPage } from './pages/SuppliersPage'
 import { ScenarioPage } from './pages/ScenarioPage'
+import { AccountPage } from './pages/AccountPage'
 
 function NavItem({ to, label }: { to: string; label: string }) {
   return (
@@ -103,6 +104,7 @@ function AuthenticatedApp() {
               <NavItem to="/orders" label="Orders" />
               <NavItem to="/suppliers" label="Suppliers" />
               <NavItem to="/scenario" label="Scenario" />
+              <NavItem to="/account" label="Account" />
             </nav>
             <div className="flex items-center gap-3">
               <span className="text-xs text-slate-400 hidden md:inline">{profile?.email ?? user?.email}</span>
@@ -159,6 +161,7 @@ function AuthenticatedApp() {
                 </ProGate>
               }
             />
+            <Route path="/account" element={<AccountPage />} />
           </Routes>
         )}
       </main>

@@ -2,6 +2,18 @@ import { supabase } from './supabase'
 
 const PRICE_ID = import.meta.env.VITE_STRIPE_PRICE_ID as string
 
+export async function startPortalSession(userId: string): Promise<void> {
+  const { data, error } = await supabase.functions.invoke('create-portal-session', {
+    body: {
+      userId,
+      returnUrl: `${window.location.origin}/account`,
+    },
+  })
+  if (error) throw new Error(error.message)
+  if (!data?.url) throw new Error('No portal URL returned')
+  window.location.href = data.url
+}
+
 export async function startCheckout(): Promise<void> {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) throw new Error('Not authenticated')
