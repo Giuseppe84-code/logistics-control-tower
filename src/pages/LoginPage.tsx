@@ -1,9 +1,14 @@
 import { useState } from 'react'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
 export function LoginPage() {
   const { signIn, signUp } = useAuth()
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const [mode, setMode] = useState<'signin' | 'signup'>(
+    searchParams.get('signup') ? 'signup' : 'signin'
+  )
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -20,8 +25,6 @@ export function LoginPage() {
         await signIn(email, password)
       } else {
         await signUp(email, password)
-        // If email confirmation is required, no session is created and
-        // onAuthStateChange will not fire — surface a friendly message.
         setInfo('Check your email to confirm your account')
       }
     } catch (err) {
@@ -34,6 +37,13 @@ export function LoginPage() {
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors mb-8"
+        >
+          ← Back to home
+        </button>
+
         <div className="flex flex-col items-center mb-8">
           <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold mb-4">
             LCT
