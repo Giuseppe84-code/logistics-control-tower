@@ -1,18 +1,16 @@
 # Logistics Control Tower
 
-> A supply chain KPI dashboard that simulates the operations of a distribution center.
+> A multi-tenant SaaS supply chain KPI dashboard — built as a portfolio piece to demonstrate logistics domain knowledge and full-stack engineering.
 
 **🔗 Live demo:** https://logistics-control-tower-mu.vercel.app
 
-A control tower lets a logistics team monitor the health of a distribution
-center at a glance: are orders arriving on time and complete? Is stock
-turning over efficiently? Where is money leaking on shipping? This project
-recreates that experience as a fast, in-browser dashboard — no backend, no
-server, no database process to run.
+---
 
-It is built as a portfolio piece to demonstrate both **supply chain domain
-knowledge** (the right KPIs, defined correctly) and the ability to **model
-operational data like a real relational system**.
+## What it is
+
+A cloud-based control tower for distribution centre operations. Logistics teams use it to monitor service levels, track supplier performance and model operational scenarios in real time.
+
+Every new account gets **six months of realistic seed data** (orders, shipments, inventory, supplier purchase orders) generated automatically at first login — no CSV uploads or manual setup.
 
 ---
 
@@ -29,29 +27,30 @@ operational data like a real relational system**.
 
 ---
 
-## What it does
+## Features
 
-- **KPI dashboard** — six core supply chain metrics, each with a plain-language
-  definition on hover:
+### Free plan
+- **KPI dashboard** — six core supply chain metrics with monthly trend charts and configurable alert thresholds:
   - **OTIF** (On-Time In-Full)
   - **Order Cycle Time**
   - **Fill Rate**
   - **Inventory Turnover**
   - **Stock-out Rate**
   - **Average Shipping Cost**
-- **Monthly trend charts** — six months of history per KPI, with the alert
-  threshold drawn as a reference line.
-- **Configurable alerts** — set a threshold per KPI; cards and a banner
-  highlight anything off-target. Thresholds are persisted in the browser.
-- **Scenario simulator** — adjust *customer demand*, *shipping cost*, and
-  *supplier reliability* and see the estimated impact on every KPI. This is
-  classic what-if analysis: _"if a key supplier's reliability drops 15%, what
-  happens to OTIF?"_
-- **Orders table** — searchable, filterable (status, region), sortable, and
-  exportable to CSV (respects the active filters).
-- **Supplier scorecard** — supplier performance derived from received purchase
-  orders: on-time delivery rate, average delay, lead time and spend, with a
-  rating per supplier and CSV export.
+- **Orders table** — searchable, filterable by status and region, sortable by date/value
+
+### Pro plan (€9/month)
+- **Supplier Scorecard** — on-time rate, average delay, lead time and spend per supplier with bar chart
+- **Scenario Simulator** — adjust demand, shipping costs and supplier reliability; see KPI impact instantly
+- **CSV export** — orders and supplier data respecting active filters
+- **Configurable alert thresholds** — persisted per user in the database
+
+### Platform
+- Email/password authentication (Supabase Auth)
+- Per-user data isolation via Row Level Security
+- Stripe Checkout for upgrades; Stripe Customer Portal for subscription management and cancellation
+- Welcome email on registration (Resend)
+- Public landing page at `/`
 
 ---
 
@@ -59,10 +58,10 @@ operational data like a real relational system**.
 
 | KPI | Definition | Why it matters |
 |-----|------------|----------------|
-| **OTIF** | % of orders delivered **on or before** the requested date **and** with 100% of the ordered quantity | The headline service-level metric — a late *or* short order fails OTIF |
+| **OTIF** | % of orders delivered **on or before** the requested date **and** with 100% of the ordered quantity | The headline service-level metric |
 | **Order Cycle Time** | Avg days from order placement to actual delivery | Measures end-to-end responsiveness |
-| **Fill Rate** | Quantity fulfilled ÷ quantity ordered, across all order lines | Captures partial fulfilment OTIF hides |
-| **Inventory Turnover** | Annualized COGS ÷ average inventory value | High = capital isn't trapped in stock |
+| **Fill Rate** | Quantity fulfilled ÷ quantity ordered, across all order lines | Captures partial fulfilment that OTIF hides |
+| **Inventory Turnover** | Annualised COGS ÷ average inventory value | High = capital is not trapped in stock |
 | **Stock-out Rate** | % of SKUs below their reorder point | Early warning for lost sales |
 | **Avg Shipping Cost** | Mean cost per outbound shipment | Tracks logistics spend efficiency |
 
@@ -70,10 +69,7 @@ operational data like a real relational system**.
 
 ## Data model
 
-The schema is designed as a **proper relational model** so it is portable to a
-real Postgres/SQLite backend with no redesign. In the browser it lives in
-IndexedDB (via Dexie), but every foreign key is explicit and indexed exactly
-as it would be in SQL.
+Designed as a proper relational schema — all foreign keys are explicit and every table has RLS policies so each user can only access their own data.
 
 ```mermaid
 erDiagram
@@ -85,15 +81,14 @@ erDiagram
     ORDERS    ||--o{ SHIPMENTS       : "is shipped via"
 
     SUPPLIERS {
-        string id PK
+        uuid   id PK
         string name
         string country
         int    lead_time_days
         float  reliability_score
-        string status
     }
     PRODUCTS {
-        string id PK
+        uuid   id PK
         string sku
         string name
         string category
@@ -101,15 +96,13 @@ erDiagram
         float  unit_price
     }
     INVENTORY {
-        string id PK
-        string product_id FK
-        string warehouse_location
+        uuid   id PK
+        uuid   product_id FK
         int    quantity_on_hand
         int    reorder_point
-        int    reorder_quantity
     }
     ORDERS {
-        string id PK
+        uuid   id PK
         string customer_name
         string customer_region
         date   order_date
@@ -118,59 +111,45 @@ erDiagram
         float  total_value
     }
     ORDER_LINES {
-        string id PK
-        string order_id FK
-        string product_id FK
+        uuid   id PK
+        uuid   order_id FK
+        uuid   product_id FK
         int    qty_ordered
         int    qty_fulfilled
-        float  unit_price
     }
     SHIPMENTS {
-        string id PK
-        string order_id FK
-        string carrier
+        uuid   id PK
+        uuid   order_id FK
         date   shipped_date
-        date   estimated_delivery
         date   actual_delivery
         float  shipping_cost
         string status
     }
     SUPPLIER_ORDERS {
-        string id PK
-        string supplier_id FK
-        string product_id FK
+        uuid   id PK
+        uuid   supplier_id FK
+        uuid   product_id FK
         int    quantity
-        date   order_date
         date   expected_delivery
         date   actual_delivery
-        float  unit_cost
         string status
     }
 ```
-
-**Design notes**
-- `orders` ↔ `order_lines` is a classic header/detail split, so fill rate can
-  be computed line by line (an order can be partially fulfilled).
-- `shipments` references `orders`, separating *what was promised*
-  (`requested_delivery_date` on the order) from *what happened*
-  (`actual_delivery` on the shipment) — that gap is exactly what OTIF measures.
-- `supplier_orders` (purchase orders) tie back to both `suppliers` and
-  `products`, so supplier lead time and reliability feed the scenario model.
 
 ---
 
 ## Tech stack
 
-Kept deliberately lean — the whole app runs client-side and is light on memory.
-
-| Layer | Choice | Why |
-|-------|--------|-----|
-| Build | **Vite** | Fast dev server, tiny config |
-| UI | **React + TypeScript** | Type-safe components, mirrors the data model |
-| Styling | **Tailwind CSS** | No runtime CSS-in-JS overhead |
-| Charts | **Recharts** | Declarative, React-native charts |
-| Persistence | **Dexie (IndexedDB)** | A relational-style store with no backend process |
-| Routing | **React Router** | Real URLs per section |
+| Layer | Choice |
+|-------|--------|
+| Build | **Vite** + **TypeScript** |
+| UI | **React 18** + **Tailwind CSS** |
+| Charts | **Recharts** |
+| Routing | **React Router v6** |
+| Backend | **Supabase** (Postgres + Auth + Edge Functions + RLS) |
+| Payments | **Stripe** (Checkout + Customer Portal + Webhooks) |
+| Email | **Resend** |
+| Deploy | **Vercel** |
 
 ---
 
@@ -178,31 +157,41 @@ Kept deliberately lean — the whole app runs client-side and is light on memory
 
 ```
 src/
-├── types/        # All domain types — single source of truth, mirrors the schema
-├── db/           # Dexie schema, singleton instance, realistic seed generator
-├── lib/          # Pure functions: KPI calculations + scenario impact model
-├── hooks/        # Reactive data access (useKPIs, useAlertThresholds)
-├── components/   # ui · dashboard · charts · orders · scenario
-└── pages/        # DashboardPage · OrdersPage · SuppliersPage · ScenarioPage
+├── types/          # Domain types — single source of truth
+├── contexts/       # AuthContext (session, profile, plan)
+├── lib/            # Pure functions: KPI calculations, scenario model, data mappers
+├── hooks/          # Reactive data access (useKPIs, useSupplierScores, useAlertThresholds)
+├── components/     # ui · dashboard · orders
+└── pages/          # LandingPage · LoginPage · DashboardPage · OrdersPage
+                    # SuppliersPage · ScenarioPage · AccountPage
+
+supabase/
+├── migrations/     # Schema, RLS policies, triggers
+└── functions/      # create-checkout-session · stripe-webhook
+                    # create-portal-session · send-welcome-email
 ```
 
-KPI logic lives in `src/lib/kpi.ts` as **pure functions** — they take arrays
-in and return numbers, with no side effects. That keeps them trivial to test
-and independent of where the data is stored, so the same calculations would
-work unchanged against a SQL backend.
+KPI logic lives in `src/lib/kpi.ts` as **pure functions** — they take arrays in and return numbers, with no side effects. The same calculations work unchanged regardless of where the data is stored.
 
 ---
 
 ## Running locally
 
 ```bash
+# 1. Clone and install
+git clone https://github.com/Giuseppe84-code/logistics-control-tower
+cd logistics-control-tower
 npm install
+
+# 2. Configure environment variables
+cp .env.example .env.local
+# Fill in VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_STRIPE_PRICE_ID
+
+# 3. Start dev server
 npm run dev      # http://localhost:5173
 ```
 
-On first launch the app seeds ~6 months of realistic data (orders, shipments,
-inventory, suppliers, lead times) into IndexedDB. To reset, clear the site's
-browser storage.
+Sign up for a new account — the workspace is seeded automatically on first login.
 
 ```bash
 npm run build    # production build into dist/
@@ -211,21 +200,31 @@ npm run preview  # preview the production build
 
 ---
 
-## Deploying
+## Deploying to Vercel
 
-The app is fully static, so any static host works. Config is already included:
+1. Import the repository on [vercel.com](https://vercel.com)
+2. Add environment variables in **Project Settings → Environment Variables**:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_STRIPE_PRICE_ID`
+3. Deploy — `vercel.json` handles SPA routing automatically
 
-- **Vercel** — import the repo; `vercel.json` handles SPA routing.
-- **Netlify** — import the repo; `netlify.toml` sets the build command and SPA
-  fallback.
+### Required external services
 
-Both rewrite all routes to `index.html` so React Router's deep links
-(`/orders`, `/scenario`) work on refresh.
+| Service | Purpose | Free tier |
+|---------|---------|-----------|
+| [Supabase](https://supabase.com) | Database, Auth, Edge Functions | Yes |
+| [Stripe](https://stripe.com) | Payments and subscription management | Test mode |
+| [Resend](https://resend.com) | Welcome email on registration | Yes |
 
 ---
 
-## Possible extensions
+## Supabase setup
 
-- Swap Dexie for a Postgres/SQLite backend using the same schema
-- Demand forecasting on the order history
-- Multi-warehouse inventory view
+Apply the migration in `supabase/migrations/0001_initial_schema.sql` via the Supabase dashboard or CLI. Then deploy the four Edge Functions in `supabase/functions/` and add these secrets:
+
+| Secret | Description |
+|--------|-------------|
+| `STRIPE_SECRET_KEY` | Stripe test/live secret key |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
+| `RESEND_API_KEY` | Resend API key |
