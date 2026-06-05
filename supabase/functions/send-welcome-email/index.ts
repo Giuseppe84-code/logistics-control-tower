@@ -11,7 +11,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { email } = await req.json()
+    const { email } = await req.json() as { email?: unknown }
     if (!email) {
       return new Response(JSON.stringify({ error: 'Missing email' }), {
         status: 400,

@@ -29,8 +29,15 @@ Deno.serve(async (req: Request) => {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
     const userId = session.client_reference_id
+    const customerId = typeof session.customer === 'string' ? session.customer : null
     if (userId) {
-      await supabase.from('profiles').update({ plan: 'pro' }).eq('id', userId)
+      await supabase
+        .from('profiles')
+        .update({
+          plan: 'pro',
+          ...(customerId ? { stripe_customer_id: customerId } : {}),
+        })
+        .eq('id', userId)
     }
   }
 
