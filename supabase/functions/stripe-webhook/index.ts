@@ -30,12 +30,21 @@ Deno.serve(async (req: Request) => {
     const session = event.data.object as Stripe.Checkout.Session
     const userId = session.client_reference_id
     const customerId = typeof session.customer === 'string' ? session.customer : null
+
+    let trialEndsAt: string | null = null
+    const subscriptionId = typeof session.subscription === 'string' ? session.subscription : null
+    if (subscriptionId) {
+      const sub = await stripe.subscriptions.retrieve(subscriptionId)
+      trialEndsAt = sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null
+    }
+
     if (userId) {
       await supabase
         .from('profiles')
         .update({
           plan: 'pro',
           ...(customerId ? { stripe_customer_id: customerId } : {}),
+          ...(trialEndsAt ? { trial_ends_at: trialEndsAt } : {}),
         })
         .eq('id', userId)
     }

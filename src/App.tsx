@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { AuthProvider, useAuth, isPro } from './contexts/AuthContext'
+import { AuthProvider, useAuth, isPro, trialDaysLeft } from './contexts/AuthContext'
 import { LoginPage } from './pages/LoginPage'
 import { LandingPage } from './pages/LandingPage'
 import { ProGate } from './components/ui/ProGate'
@@ -54,6 +54,7 @@ function FullScreenSpinner({ label }: { label: string }) {
 function AuthenticatedApp() {
   const { profile, user, signOut } = useAuth()
   const pro = isPro(profile)
+  const daysLeft = trialDaysLeft(profile)
   const [seeding, setSeeding] = useState(true)
 
   useEffect(() => {
@@ -135,6 +136,13 @@ function AuthenticatedApp() {
           </div>
         </div>
       </header>
+
+      {/* Trial banner */}
+      {daysLeft > 0 && (
+        <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 text-center text-xs text-amber-300">
+          Your 14-day free trial ends in <span className="font-semibold">{daysLeft} day{daysLeft !== 1 ? 's' : ''}</span> — then €9/month. No action needed, you&apos;ll be charged automatically.
+        </div>
+      )}
 
       {/* Main */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

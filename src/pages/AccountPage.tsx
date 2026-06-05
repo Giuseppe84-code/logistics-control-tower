@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { useAuth, isPro } from '../contexts/AuthContext'
+import { useAuth, isPro, trialDaysLeft } from '../contexts/AuthContext'
 import { startPortalSession } from '../lib/billing'
 
 export function AccountPage() {
   const { profile, user } = useAuth()
   const pro = isPro(profile)
+  const daysLeft = trialDaysLeft(profile)
+  const onTrial = daysLeft > 0
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -55,10 +57,24 @@ export function AccountPage() {
 
         {pro ? (
           <>
-            <p className="text-sm text-slate-400">
-              You are on the <span className="text-emerald-400 font-medium">Pro plan</span> (€9/month).
-              You have full access to Supplier Scorecard, Scenario Simulator and CSV export.
-            </p>
+            {onTrial ? (
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
+                <p className="text-sm text-amber-300 font-medium">
+                  Free trial — {daysLeft} day{daysLeft !== 1 ? 's' : ''} remaining
+                </p>
+                <p className="text-xs text-slate-400 mt-1">
+                  Your card will be charged €9 on{' '}
+                  {new Date(profile!.trial_ends_at!).toLocaleDateString('en-GB', {
+                    day: 'numeric', month: 'long', year: 'numeric',
+                  })}. Cancel anytime before then to avoid charges.
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-slate-400">
+                You are on the <span className="text-emerald-400 font-medium">Pro plan</span> (€9/month).
+                You have full access to Supplier Scorecard, Scenario Simulator and CSV export.
+              </p>
+            )}
             {error && <p className="text-sm text-red-400">{error}</p>}
             <button
               onClick={handleManageSubscription}
@@ -81,7 +97,7 @@ export function AccountPage() {
               href="/suppliers"
               className="self-start text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg px-4 py-2 transition-colors"
             >
-              Upgrade to Pro — €9/month
+              Start 14-day free trial — €9/month after
             </a>
           </>
         )}

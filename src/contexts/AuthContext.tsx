@@ -8,10 +8,17 @@ export interface Profile {
   id: string
   email: string
   plan: PlanTier
+  trial_ends_at: string | null
 }
 
 export function isPro(profile: Profile | null): boolean {
   return profile?.plan === 'pro'
+}
+
+export function trialDaysLeft(profile: Profile | null): number {
+  if (!profile?.trial_ends_at) return 0
+  const ms = new Date(profile.trial_ends_at).getTime() - Date.now()
+  return Math.max(0, Math.ceil(ms / 86_400_000))
 }
 
 interface AuthContextValue {
@@ -30,7 +37,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 async function fetchProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, email, plan')
+    .select('id, email, plan, trial_ends_at')
     .eq('id', userId)
     .maybeSingle()
 
