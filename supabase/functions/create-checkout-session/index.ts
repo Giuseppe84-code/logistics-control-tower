@@ -35,7 +35,7 @@ Deno.serve(async (req: Request) => {
       customer_email: userEmail,
       success_url: successUrl,
       cancel_url: cancelUrl,
-      subscription_data: { metadata: { userId } },
+      subscription_data: { trial_period_days: 14, metadata: { userId } },
     })
 
     return new Response(JSON.stringify({ url: session.url }), {

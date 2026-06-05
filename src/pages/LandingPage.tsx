@@ -91,7 +91,7 @@ export function LandingPage() {
             onClick={() => navigate('/login?signup=1')}
             className="w-full sm:w-auto text-base font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-xl px-8 py-3.5 transition-colors"
           >
-            Get started free
+            Start 14-day free trial →
           </button>
           <button
             onClick={() => navigate('/login')}
@@ -160,11 +160,11 @@ export function LandingPage() {
           {/* Pro */}
           <div className="bg-blue-600/10 border border-blue-500/30 rounded-2xl p-6 relative">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-widest text-blue-300 bg-blue-600 rounded-full px-3 py-1">
-              Popular
+              14-day free trial
             </div>
             <p className="text-sm font-semibold text-blue-300 uppercase tracking-wide mb-1">Pro</p>
             <p className="text-4xl font-bold text-white mb-1">€9</p>
-            <p className="text-xs text-slate-500 mb-6">per month</p>
+            <p className="text-xs text-slate-500 mb-6">per month after trial</p>
             <ul className="space-y-2 mb-8">
               {PRO_FEATURES.map(f => (
                 <li key={f} className="flex items-center gap-2 text-sm text-slate-300">
@@ -176,8 +176,9 @@ export function LandingPage() {
               onClick={() => navigate('/login?signup=1')}
               className="w-full text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg py-2.5 transition-colors"
             >
-              Start free, upgrade anytime
+              Start 14-day free trial →
             </button>
+            <p className="text-xs text-slate-500 text-center mt-2">No charge for 14 days. Cancel anytime.</p>
           </div>
         </div>
       </section>
