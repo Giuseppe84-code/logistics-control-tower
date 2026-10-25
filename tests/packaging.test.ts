@@ -22,6 +22,16 @@ it('packages a pinned tree reproducibly, excludes local secrets and seller files
     writeFileSync(join(root, '.env.local'), 'must never ship')
     const first = makeArchive(root, 'HEAD'), second = makeArchive(root, 'HEAD')
     expect(first.bytes).toEqual(second.bytes)
+    const originalTimezone = process.env.TZ
+    try {
+      for (const timezone of ['UTC', 'Europe/Rome', 'America/Los_Angeles', 'Pacific/Kiritimati']) {
+        process.env.TZ = timezone
+        expect(makeArchive(root, 'HEAD').bytes).toEqual(first.bytes)
+      }
+    } finally {
+      if (originalTimezone === undefined) delete process.env.TZ
+      else process.env.TZ = originalTimezone
+    }
     const names = Object.keys(unzipSync(first.bytes))
     expect(names).not.toContain('logistics-control-tower/GUMROAD_LISTING.md')
     expect(names.some(name => name.includes('.git/') || name.includes('.env.local'))).toBe(false)

@@ -33,7 +33,9 @@ export function makeArchive(root, ref) {
   if (pkg.version !== lock.version || pkg.version !== lock.packages[''].version) throw Error('Version mismatch')
   const hashes = Object.fromEntries(Object.keys(files).sort().map(path => [path, digest(files[path])]))
   files['RELEASE.json'] = Buffer.from(JSON.stringify({ version: pkg.version, commit, files: hashes }, null, 2) + '\n')
-  const content = Object.fromEntries(Object.keys(files).sort().map(path => [`logistics-control-tower/${path}`, [files[path], { mtime: new Date('1980-01-01T00:00:00Z'), os: 3, attrs: 0o100644 << 16 }]]))
+  // ZIP stores local calendar fields without a timezone. Construct local midnight
+  // so machines in different timezones write identical, valid DOS timestamps.
+  const content = Object.fromEntries(Object.keys(files).sort().map(path => [`logistics-control-tower/${path}`, [files[path], { mtime: new Date(1980, 0, 1, 0, 0, 0), os: 3, attrs: 0o100644 << 16 }]]))
   return { bytes: zipSync(content, { level: 9 }), version: pkg.version, commit }
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

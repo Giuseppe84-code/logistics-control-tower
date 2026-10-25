@@ -15,6 +15,7 @@
 - Updated vulnerable dependencies and pinned Node and package dependency versions.
 - Added database isolation, billing boundary, signature and packaging regression tests.
 - Added deterministic source packaging, checksums and clean-archive verification.
+- Fixed ZIP timestamps across timezones and added verified CI artifact downloads.
 
 Includes KPI dashboard, orders, supplier scorecard, scenario simulator, CSV export,
 per-user data and UI feature gating. Demo data is synthetic. The scenario model
