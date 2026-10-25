@@ -13,6 +13,21 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm run check
-      - run: npm audit --audit-level=moderate
+      - run: npm audit --audit-level=low
       - run: npm run package:release -- --ref HEAD
+      - name: Verify reproducible archive
+        run: |
+          cp release/logistics-control-tower-1.0.0.zip.sha256 "$RUNNER_TEMP/expected.sha256"
+          npm run package:release -- --ref HEAD
+          cmp "$RUNNER_TEMP/expected.sha256" release/logistics-control-tower-1.0.0.zip.sha256
       - run: npm run verify:archive -- release/logistics-control-tower-1.0.0.zip
+      - name: Upload verified release candidate
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: logistics-control-tower-${{ github.sha }}
+          path: |
+            release/logistics-control-tower-1.0.0.zip
+            release/logistics-control-tower-1.0.0.zip.sha256
+          if-no-files-found: error
+          retention-days: 14

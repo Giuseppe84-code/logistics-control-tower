@@ -51,5 +51,10 @@ rules apply. Do not promise that accessing the download removes every refund rig
 6. Upload ONLY that ZIP. Keep its SHA-256, source commit and acceptance evidence.
 7. Confirm the checkout policy, single-seat variant and file download before launch.
 
+Alternatively, download the verified candidate from the successful GitHub Actions
+push run for the exact reviewed commit. Extract the outer GitHub artifact and use
+the inner project ZIP with its .sha256 file. Artifacts expire after 14 days; the
+same commit can be packaged again. Do not upload GitHub's outer artifact wrapper.
+
 Enable Gumroad license keys only if useful for purchase records. The application
 does not contain a seat-activation or license-key verification system.

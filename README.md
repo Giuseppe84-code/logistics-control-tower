@@ -81,6 +81,13 @@ installs the pinned dependencies and runs all automated checks plus the build.
 The generated .sha256 file identifies the ZIP. Publication is a separate action
 requiring the hosted and commercial checks in RELEASE_CHECKLIST.md.
 
+GitHub Actions also runs these checks and uploads the verified ZIP and checksum
+as an artifact of each successful **push** run (retained for 14 days). Download
+the artifact named with the reviewed commit from the "Release candidate checks"
+workflow. Extract GitHub's outer artifact container; the inner project ZIP is the
+file to review/upload to Gumroad. Pull-request merge test runs do not upload a
+sale candidate. A downloadable artifact is not approval to publish it.
+
 ## License and support
 
 See LICENSE for one named developer seat, unlimited projects and permitted client
