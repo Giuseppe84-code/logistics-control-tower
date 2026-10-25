@@ -18,6 +18,8 @@ migration workflow for a new linked project. The files are:
 2. 0002_add_trial_ends_at.sql — customer mapping and trial columns used by the app.
 3. 20261024164950_harden_billing_and_tenant_access.sql — client read-only profiles,
    explicit grants, tenant-consistent foreign keys and service-only billing RPCs.
+4. 20261025141741_restrict_legacy_billing_access.sql — remove the obsolete SQL
+   welcome-email trigger and restrict legacy internal function/table permissions.
 
 Do not apply only 0001. Do not rerun all migrations on an existing installation.
 The hardening migration deliberately fails on duplicate Stripe customer mappings
@@ -46,6 +48,23 @@ Checkout flows relied on metadata instead of a pre-persisted customer mapping;
 confirm profiles.stripe_customer_id identifies the correct owner. Existing
 unmapped customers are intentionally ignored by the new webhook. Replay a current
 subscription event after correcting each verified mapping.
+
+If duplicate customer mappings block the full upgrade, the standalone
+20261025141741_restrict_legacy_billing_access.sql can be applied first through
+the SQL Editor in a transaction. It preserves existing records, plans and customer
+IDs while making billing tables read-only to clients and removing the legacy
+on_profile_created_send_welcome trigger. The internal trigger functions remain
+defined for recovery, with public/client execution revoked. Signup still creates
+a profile; welcome email resumes only through the configured authenticated
+endpoint and updated frontend. This limited step does not secure the old deployed
+HTTP handlers or complete the billing upgrade.
+
+Do not clear duplicate mappings or assign them to an arbitrary user. Verify the
+customer against the correct Stripe account and mode, including historical
+subscription metadata and confirmed account ownership. A customer missing from
+one test account is not evidence that it can safely be deleted. Once ownership
+is reconciled, apply the full hardening migration and align migration history
+before using automated CLI upgrades on that existing project.
 
 ## 2. Browser environment
 

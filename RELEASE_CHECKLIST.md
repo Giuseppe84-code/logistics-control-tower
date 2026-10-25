@@ -19,10 +19,20 @@ matching the candidate's RELEASE.json commit, not an earlier green run.
 ## Required hosted staging acceptance (record date, commit, project and evidence)
 Use isolated staging Supabase and Stripe sandbox accounts. Never record keys,
 JWTs, portal URLs, customer personal data or payment details in this checklist.
-Pending as of 25 October 2026: the available Supabase projects are inactive and
-not yet identified as this application's staging environment; the Stripe test
-account requires owner confirmation. Vercel team access requires authorization.
-No hosted migrations, test payments or function deployments have been performed.
+Hosted progress on 25 October 2026: the owner identified the active Supabase
+project. The standalone restrict_legacy_billing_access migration was applied and
+verified: client billing writes and public execution of the internal trigger
+functions are denied, the obsolete SQL welcome trigger is removed, and existing
+records/plans are preserved. Advisor warnings for those functions are resolved.
+
+The full upgrade remains blocked by duplicate customer mappings whose customer
+was not found in the connected Stripe test account. Ownership must be reconciled
+against the correct account/mode. The signed-in dashboard account cannot access
+the project, so backend secrets cannot yet be verified/configured. Vercel team
+access is also unavailable. No new Edge Function deployments or hosted payment
+acceptance tests have been completed. Auth leaked-password protection remains
+disabled; authenticated GraphQL schema visibility is expected for app tables and
+does not replace the required RLS/isolation checks.
 - [ ] Install every migration on a new project, deploy all four functions, set
       secrets and configure Auth/site URLs and Stripe Portal using SETUP.md.
 - [ ] Two confirmed users: login/logout, own profile/data only; attempts to change
