@@ -9,6 +9,7 @@ export interface Profile {
   email: string
   plan: PlanTier
   trial_ends_at: string | null
+  stripe_customer_id: string | null
 }
 
 export function isPro(profile: Profile | null): boolean {
@@ -37,7 +38,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 async function fetchProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, email, plan, trial_ends_at')
+    .select('id, email, plan, trial_ends_at, stripe_customer_id')
     .eq('id', userId)
     .maybeSingle()
 
@@ -47,46 +48,61 @@ async function fetchProfile(userId: string): Promise<Profile | null> {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
-  const [user, setUser] = useState<User | null>(null)
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  async function loadProfile(u: User | null) {
-    if (!u) {
-      setProfile(null)
-      return
-    }
-    const p = await fetchProfile(u.id)
-    setProfile(p)
-  }
+  const [profileState, setProfileState] = useState<{ userId: string; profile: Profile | null } | null>(null)
+  const [authReady, setAuthReady] = useState(false)
+  const user = session?.user ?? null
+  const userId = user?.id
+  const profile = profileState?.userId === userId ? profileState?.profile ?? null : null
+  const loading = !authReady || Boolean(userId && profileState?.userId !== userId)
 
   useEffect(() => {
     let mounted = true
-
-    supabase.auth.getSession().then(async ({ data }) => {
+    let receivedEvent = false
+    // Auth callbacks must return synchronously; profile requests run separately.
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
       if (!mounted) return
-      setSession(data.session)
-      setUser(data.session?.user ?? null)
-      await loadProfile(data.session?.user ?? null)
-      if (mounted) setLoading(false)
-    })
-
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
-      if (!mounted) return
+      receivedEvent = true
       setSession(newSession)
-      setUser(newSession?.user ?? null)
-      await loadProfile(newSession?.user ?? null)
-      if (mounted) setLoading(false)
+      setAuthReady(true)
     })
-
-    return () => {
-      mounted = false
-      sub.subscription.unsubscribe()
-    }
+    void supabase.auth.getSession().then(({ data }) => {
+      if (!mounted || receivedEvent) return
+      setSession(data.session)
+      setAuthReady(true)
+    }).catch(() => { if (mounted) setAuthReady(true) })
+    return () => { mounted = false; sub.subscription.unsubscribe() }
   }, [])
 
+  useEffect(() => {
+    if (!userId) { setProfileState(null); return }
+    let mounted = true
+    let pending = false
+    const load = async () => {
+      if (pending) return
+      pending = true
+      try {
+        const next = await fetchProfile(userId)
+        if (mounted) setProfileState({ userId, profile: next })
+      } finally { pending = false }
+    }
+    const refreshVisible = () => {
+      if (document.visibilityState === 'visible') void load()
+    }
+    void load()
+    // A checkout redirect can arrive before the webhook commits the new plan.
+    const timer = window.setInterval(refreshVisible, 15000)
+    window.addEventListener('focus', refreshVisible)
+    document.addEventListener('visibilitychange', refreshVisible)
+    return () => {
+      mounted = false
+      window.clearInterval(timer)
+      window.removeEventListener('focus', refreshVisible)
+      document.removeEventListener('visibilitychange', refreshVisible)
+    }
+  }, [userId])
+
   async function refreshProfile() {
-    await loadProfile(user)
+    if (userId) setProfileState({ userId, profile: await fetchProfile(userId) })
   }
 
   async function signIn(email: string, password: string) {
@@ -101,7 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function signOut() {
     await supabase.auth.signOut()
-    setProfile(null)
+    setProfileState(null)
   }
 
   const value: AuthContextValue = {

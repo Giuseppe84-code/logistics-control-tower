@@ -1,0 +1,4 @@
+{
+  "directories": ["src", "supabase", "docs", "scripts", "tests"],
+  "files": [".env.example", ".gitignore", ".nvmrc", "LICENSE", "CHANGELOG.md", "README.md", "THIRD_PARTY_NOTICES.md", "RELEASE_CHECKLIST.md", "release.manifest.json", "index.html", "package.json", "package-lock.json", "postcss.config.js", "tailwind.config.ts", "tsconfig.json", "tsconfig.node.json", "vercel.json", "netlify.toml", "vite.config.ts", "vitest.config.ts"]
+}

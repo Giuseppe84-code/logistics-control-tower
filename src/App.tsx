@@ -1,3 +1,4 @@
+import { supabase } from './lib/supabase'
 import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { AuthProvider, useAuth, isPro, trialDaysLeft } from './contexts/AuthContext'
@@ -53,6 +54,7 @@ function FullScreenSpinner({ label }: { label: string }) {
 
 function AuthenticatedApp() {
   const { profile, user, signOut } = useAuth()
+  const userId = user?.id
   const pro = isPro(profile)
   const daysLeft = trialDaysLeft(profile)
   const [seeding, setSeeding] = useState(true)
@@ -60,11 +62,12 @@ function AuthenticatedApp() {
   useEffect(() => {
     let active = true
     async function setup() {
-      if (!user) return
+      if (!userId) return
+      void supabase.functions.invoke('send-welcome-email', { body: {} }).catch(() => {})
       try {
-        const exists = await hasData(user.id)
+        const exists = await hasData(userId)
         if (!exists) {
-          await seedCloudData(user.id)
+          await seedCloudData(userId)
         }
       } catch (err) {
         console.error('Workspace setup failed', err)
@@ -76,7 +79,7 @@ function AuthenticatedApp() {
     return () => {
       active = false
     }
-  }, [user])
+  }, [userId])
 
   function handleUpgrade() {
     startCheckout().catch((err: unknown) => {

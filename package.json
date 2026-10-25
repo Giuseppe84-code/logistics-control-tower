@@ -1,31 +1,47 @@
 {
   "name": "logistics-control-tower",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:edge": "deno test --cached-only --allow-env --config supabase/functions/deno.json supabase/functions/_shared/",
+    "check:edge": "deno check --cached-only --config supabase/functions/deno.json supabase/functions/create-checkout-session/index.ts supabase/functions/create-portal-session/index.ts supabase/functions/stripe-webhook/index.ts supabase/functions/send-welcome-email/index.ts",
+    "check": "npm test && npm run test:edge && npm run check:edge && npm run build",
+    "package:release": "node scripts/package-release.mjs",
+    "verify:archive": "node scripts/verify-archive.mjs"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.107.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.26.2",
-    "recharts": "^2.13.3"
+    "@supabase/supabase-js": "2.118.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "7.18.4",
+    "recharts": "2.15.4"
   },
   "devDependencies": {
-    "@types/react": "^18.3.11",
-    "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react": "^4.3.2",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.47",
-    "tailwindcss": "^3.4.14",
-    "typescript": "^5.6.3",
-    "vite": "^5.4.10",
-    "vitest": "^4.1.8"
+    "@electric-sql/pglite": "0.5.11",
+    "@types/react": "18.3.29",
+    "@types/react-dom": "18.3.7",
+    "@vitejs/plugin-react": "6.1.2",
+    "autoprefixer": "10.5.0",
+    "deno": "2.9.6",
+    "fflate": "0.8.3",
+    "postcss": "8.5.31",
+    "stripe": "23.0.1",
+    "tailwindcss": "3.4.19",
+    "typescript": "5.9.3",
+    "vite": "8.3.5",
+    "vitest": "5.0.5"
+  },
+  "engines": {
+    "node": ">=24.22.1 <25"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "overrides": {
+    "postcss-selector-parser": "7.1.6"
   }
 }

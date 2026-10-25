@@ -15,7 +15,7 @@ export function AccountPage() {
     setLoading(true)
     setError(null)
     try {
-      await startPortalSession(user.id)
+      await startPortalSession()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
@@ -97,8 +97,15 @@ export function AccountPage() {
               href="/suppliers"
               className="self-start text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg px-4 py-2 transition-colors"
             >
-              Start 14-day free trial — €9/month after
+              {profile?.stripe_customer_id ? 'View Pro options' : 'Start 14-day free trial — €9/month after'}
             </a>
+            {profile?.stripe_customer_id && (
+              <button onClick={handleManageSubscription} disabled={loading}
+                className="self-start text-sm text-slate-200 underline disabled:opacity-50">
+                {loading ? 'Redirecting…' : 'Manage existing billing account'}
+              </button>
+            )}
+            {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
           </>
         )}
       </div>
