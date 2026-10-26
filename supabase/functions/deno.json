@@ -1,4 +1,5 @@
 {
+  "nodeModulesDir": "manual",
   "compilerOptions": {
     "strict": true,
     "noUnusedLocals": true,

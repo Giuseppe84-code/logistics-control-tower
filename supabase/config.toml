@@ -1,0 +1,11 @@
+project_id = "logistics-control-tower"
+# User handlers validate JWTs with Supabase Auth, supporting current signing keys.
+[functions.create-checkout-session]
+verify_jwt = false
+[functions.create-portal-session]
+verify_jwt = false
+[functions.send-welcome-email]
+verify_jwt = false
+# Stripe authenticates with a signature over the raw request body.
+[functions.stripe-webhook]
+verify_jwt = false

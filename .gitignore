@@ -1,6 +1,7 @@
-node_modules
-dist
+node_modules/
+dist/
+release/
 .DS_Store
-.env
-.env.local
-.env.*.local
+.env*
+!.env.example
+supabase/.temp/

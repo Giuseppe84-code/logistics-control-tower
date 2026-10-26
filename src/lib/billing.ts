@@ -1,36 +1,14 @@
 import { supabase } from './supabase'
 
-const PRICE_ID = import.meta.env.VITE_STRIPE_PRICE_ID as string
-
-export async function startPortalSession(userId: string): Promise<void> {
-  const { data, error } = await supabase.functions.invoke('create-portal-session', {
-    body: {
-      userId,
-      returnUrl: `${window.location.origin}/account`,
-    },
-  })
-  if (error) throw new Error(error.message)
-  if (!data?.url) throw new Error('No portal URL returned')
-  window.location.href = data.url
+async function redirectToBilling(functionName: string): Promise<void> {
+  const { data, error } = await supabase.functions.invoke(functionName, { body: {} })
+  if (error) throw new Error('Billing is temporarily unavailable. Please try again.')
+  if (!data?.url) throw new Error('No billing URL returned')
+  const url = new URL(data.url)
+  if (url.protocol !== 'https:' || !['checkout.stripe.com', 'billing.stripe.com'].includes(url.hostname)) {
+    throw new Error('Invalid billing destination')
+  }
+  window.location.assign(url.href)
 }
-
-export async function startCheckout(): Promise<void> {
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) throw new Error('Not authenticated')
-
-  const origin = window.location.origin
-  const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-    body: {
-      priceId: PRICE_ID,
-      userId: session.user.id,
-      userEmail: session.user.email,
-      successUrl: `${origin}/dashboard?upgraded=1`,
-      cancelUrl: `${origin}/dashboard`,
-    },
-  })
-
-  if (error) throw new Error(error.message)
-  if (!data?.url) throw new Error('No checkout URL returned')
-
-  window.location.href = data.url
-}
+export const startPortalSession = () => redirectToBilling('create-portal-session')
+export const startCheckout = () => redirectToBilling('create-checkout-session')
