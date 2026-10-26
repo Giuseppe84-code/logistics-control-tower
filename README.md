@@ -79,7 +79,11 @@ npm run verify:archive -- release/logistics-control-tower-1.0.0.zip
 The verification command extracts into a temporary directory, validates hashes,
 installs the pinned dependencies and runs all automated checks plus the build.
 The generated .sha256 file identifies the ZIP. Publication is a separate action
-requiring the hosted and commercial checks in RELEASE_CHECKLIST.md.
+requiring the hosted and commercial checks in RELEASE_CHECKLIST.md. For an
+approved or downloaded candidate, add `--expected-commit FULL_SHA
+--expected-sha256 ZIP_SHA256` to verification, replacing both placeholders from
+the separately approved release record. Internal file hashes alone do not prove
+that a ZIP is the approved candidate.
 
 GitHub Actions also runs these checks and uploads the verified ZIP and checksum
 as an artifact of each successful **push** run (retained for 14 days). Download

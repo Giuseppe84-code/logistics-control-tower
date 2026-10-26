@@ -6,6 +6,11 @@ import { createHash } from 'node:crypto'
 import { zipSync } from 'fflate'
 
 export const digest = value => createHash('sha256').update(value).digest('hex')
+// Expectations must come from a separately approved record, never the ZIP itself.
+export function verifyArchiveIdentity(bytes, metadata, expectedCommit, expectedSha256) {
+  if (expectedCommit !== undefined && (!/^[a-f0-9]{40}$/.test(expectedCommit) || metadata.commit !== expectedCommit)) throw Error('Approved source commit mismatch')
+  if (expectedSha256 !== undefined && (!/^[a-f0-9]{64}$/.test(expectedSha256) || digest(bytes) !== expectedSha256)) throw Error('Approved ZIP checksum mismatch')
+}
 export function validateFile(path, bytes) {
   if (/[\x00-\x1f\x7f]/.test(path) || path.split('/').some(p => ['..', '.git', 'node_modules', 'dist', '.temp'].includes(p)) || path.startsWith('/') || path.includes('\\')) throw Error(`Forbidden path: ${path}`)
   if ((/(^|\/)\.env/.test(path) && path !== '.env.example') || /\.(pem|key|p12|pfx|sqlite|db|log|zip)$/i.test(path) || path === 'GUMROAD_LISTING.md') throw Error(`Sensitive file: ${path}`)

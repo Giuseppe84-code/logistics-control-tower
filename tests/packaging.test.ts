@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import { execFileSync } from 'node:child_process'
 import { unzipSync } from 'fflate'
 // @ts-expect-error Plain Node release tooling is exercised directly.
-import { makeArchive, validateFile } from '../scripts/package-release.mjs'
+import { makeArchive, validateFile, verifyArchiveIdentity, digest } from '../scripts/package-release.mjs'
 
 it('packages a pinned tree reproducibly, excludes local secrets and seller files, and checks versions', () => {
   const root = mkdtempSync(join(tmpdir(), 'lct-packaging-'))
@@ -48,4 +48,12 @@ it('rejects accidentally selected secret files and realistic credential patterns
   expect(() => validateFile('.env.example', Buffer.from('PUBLIC_URL=https://configured.invalid'))).toThrow(/empty/)
   const syntheticKey = ['sk', 'live', 'X'.repeat(24)].join('_')
   expect(() => validateFile('src/config.ts', Buffer.from(syntheticKey))).toThrow(/Possible secret/)
+})
+
+it('rejects a substituted archive or wrong approved commit even with self-consistent metadata', () => {
+  const bytes = Buffer.from('approved archive'), commit = 'a'.repeat(40)
+  expect(() => verifyArchiveIdentity(bytes, { commit }, commit, digest(bytes))).not.toThrow()
+  expect(() => verifyArchiveIdentity(Buffer.from('replacement'), { commit }, commit, digest(bytes))).toThrow(/checksum mismatch/)
+  expect(() => verifyArchiveIdentity(bytes, { commit: 'b'.repeat(40) }, commit, digest(bytes))).toThrow(/commit mismatch/)
+  expect(() => verifyArchiveIdentity(bytes, { commit }, 'HEAD', digest(bytes))).toThrow(/commit mismatch/)
 })

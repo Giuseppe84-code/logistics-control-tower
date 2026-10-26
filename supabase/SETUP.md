@@ -28,7 +28,13 @@ or cross-tenant references; repair ownership manually before applying it.
 ### Existing-installation preflight
 
 Back up the database and first test the upgrade against a staging copy. Confirm
-which migrations were applied. Before applying the hardening migration, inspect:
+which migrations were applied. Run `supabase/verification/billing-preflight.sql`
+with database-owner visibility (not an app JWT): all seven violation counts must
+be zero. The script is read-only, returns aggregate counts and works before or
+after hardening. It cannot prove Stripe ownership, secrets, migration history or
+hosted RLS behavior. If a count is nonzero, investigate privately using the
+queries below; preserve backups and obtain a documented ownership decision.
+Before applying the hardening migration, inspect:
 
 ```sql
 select stripe_customer_id, count(*) from profiles

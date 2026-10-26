@@ -45,11 +45,12 @@ rules apply. Do not promise that accessing the download removes every refund rig
 ## Publishing procedure
 1. Complete every blocking item in RELEASE_CHECKLIST.md on a fresh staging stack.
 2. Record the tested commit and approve the matching license/listing/screenshots.
-3. From a clean checkout: `npm ci`, `npm run check`, `npm audit`.
+3. From a clean checkout: `npm ci --ignore-scripts`, `npm run check`, `npm audit --audit-level=low`.
 4. `npm run package:release -- --ref HEAD`.
-5. `npm run verify:archive -- release/logistics-control-tower-1.0.0.zip`.
+5. `npm run verify:archive -- release/logistics-control-tower-1.0.0.zip --expected-commit FULL_SHA --expected-sha256 ZIP_SHA256` (replace both placeholders from the approved record).
 6. Upload ONLY that ZIP. Keep its SHA-256, source commit and acceptance evidence.
-7. Confirm the checkout policy, single-seat variant and file download before launch.
+7. Keep the product draft; verify its actual download with the same approved commit
+   and SHA-256, confirm policy/variant, then obtain explicit publication approval.
 
 Alternatively, download the verified candidate from the successful GitHub Actions
 push run for the exact reviewed commit. Extract the outer GitHub artifact and use

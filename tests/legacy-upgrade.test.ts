@@ -38,6 +38,11 @@ it('protects a legacy installation with duplicate mappings without altering its 
       { plan: 'pro', stripe_customer_id: 'cus_legacy_fixture' },
       { plan: 'pro', stripe_customer_id: 'cus_legacy_fixture' },
     ])
+    const preflight = await db.exec(readFileSync('supabase/verification/billing-preflight.sql', 'utf8'))
+    const results = preflight.flatMap(result => result.rows) as { check_name: string; violations: number }[]
+    expect(results).toHaveLength(7)
+    expect(Number(results.find(row => row.check_name === 'duplicate_customer_groups')?.violations)).toBe(1)
+    expect(results.filter(row => row.check_name !== 'duplicate_customer_groups').every(row => Number(row.violations) === 0)).toBe(true)
     await db.exec('set role authenticated')
     await db.query("select set_config('request.jwt.claim.sub',$1,false)", [first])
     expect((await db.query('select id from public.profiles')).rows).toEqual([{ id: first }])
