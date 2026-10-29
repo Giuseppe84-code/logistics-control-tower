@@ -12,22 +12,47 @@ Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
   try {
+    const token = req.headers.get('Authorization')?.match(/^Bearer\s+(\S+)$/i)?.[1]
+    if (!token) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json', ...CORS },
+      })
+    }
+
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      { auth: { persistSession: false, autoRefreshToken: false } }
+    )
+
+    // Verify with Auth; never trust a decoded JWT or client-supplied identity.
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json', ...CORS },
+      })
+    }
+
+    const { userId, returnUrl } = await req.json()
+    // Keep compatibility with existing clients, but reject impersonation.
+    if (userId !== undefined && userId !== user.id) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json', ...CORS },
+      })
+    }
+
     const secretKey = Deno.env.get('STRIPE_SECRET_KEY')
     if (!secretKey) throw new Error('STRIPE_SECRET_KEY not configured')
 
     const stripe = new Stripe(secretKey, { apiVersion: '2024-04-10' })
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    )
-
-    const { userId, returnUrl } = await req.json()
-    if (!userId) throw new Error('Missing userId')
 
     const { data: profile } = await supabase
       .from('profiles')
       .select('stripe_customer_id')
-      .eq('id', userId)
+      .eq('id', user.id)
       .single()
 
     if (!profile?.stripe_customer_id) {
